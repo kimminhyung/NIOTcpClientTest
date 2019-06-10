@@ -67,6 +67,7 @@ public class SocketClientWin {
 		frame.getContentPane().setLayout(null);
 		
 		txtSend = new JTextField();
+		txtSend.setText("안녕하세요");
 		txtSend.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyPressed(KeyEvent arg0) {
@@ -119,7 +120,7 @@ public class SocketClientWin {
 		txtIp.setColumns(10);
 		
 		txtPort = new JTextField();
-		txtPort.setText("5000");
+		txtPort.setText("7001");
 		txtPort.setBounds(602, 96, 116, 24);
 		frame.getContentPane().add(txtPort);
 		txtPort.setColumns(10);

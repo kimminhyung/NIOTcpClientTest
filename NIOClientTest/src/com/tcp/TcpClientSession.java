@@ -127,6 +127,11 @@ public class TcpClientSession {
 
 		ByteBuffer byteBuffer = ByteBuffer.allocateDirect(1024*1024);
 		int readCnt = socketChannel.read(byteBuffer);
+		if( readCnt == -1){
+			log("클라이언트 연결 끊김.  It will be closed .");
+			this.disConnect();
+			return;
+		}
 		
 		byteBuffer.flip();
 		int limit = byteBuffer.limit();
@@ -149,18 +154,12 @@ public class TcpClientSession {
 		socketChannel.register(selector, SelectionKey.OP_CONNECT);
 		
 		InetSocketAddress serverAddr = new InetSocketAddress(ip, Integer.parseInt(port));
-		socketChannel.connect(serverAddr);
-		
-		selector.wakeup();
-		
-//		socketChannel.register(selector, SelectionKey.OP_CONNECT);		
-//		Socket socket = socketChannel.socket();
-//		socket.setKeepAlive(true);
-//		socket.setTcpNoDelay(true);
-		
+		socketChannel.connect(serverAddr);		
+		selector.wakeup();	
+
 		//SelectionKey selectionKey = socketChannel.register(selector, SelectionKey.OP_READ, null);
-		log("소켓연결 .... ip:"+ ip+", port:"+ port);
-//		selector.wakeup();
+		log("소켓연결 .... ip:"+ ip+", port:"+ port+", socketChannel :"+ socketChannel.toString());
+		selector.wakeup();
 	}
 	
 	
@@ -187,7 +186,7 @@ public class TcpClientSession {
 	public void disConnect() throws Exception{
 		
 		// 설렉터 쓰레드 중지시키고
-		selRunning = false;
+//		selRunning = false;
 		// 썰렉터를 기동시키고 있는 쓰레드 풀을 중지 시키고..
 //		executor.shutdown();
 		
@@ -206,16 +205,18 @@ public class TcpClientSession {
 		msg = appendHeaderLength(msg, encType);
 		ByteBuffer buffer =  charSet.encode(msg);	
 		pWin.log(msg);
-		socketChannel.write(buffer);
 		
+		log("writing ... socketChannel :"+ socketChannel.toString() +", is Open :" + socketChannel.isOpen());
 		
+		socketChannel.write(buffer);		
 		(socketChannel.keyFor(selector)).interestOps(SelectionKey.OP_READ);	
 		selector.wakeup();		
+		
 //		log("client socket data write data["+ charSet.decode(buffer).toString() +"]");			
 		
 //		readData();
 	}
-	
+
 	/**
 	 * 패킷의 8byte 헤더길이 스트링 추가 해서 msg 생성
 	 * @param msg
